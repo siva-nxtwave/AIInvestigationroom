@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #070a0f;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Custom dossier textures and styling */
+.dossier-border {
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(245, 158, 11, 0.05);
+}
+
+.dossier-card {
+  background: linear-gradient(180deg, rgba(26, 34, 50, 0.8) 0%, rgba(19, 25, 35, 0.95) 100%);
+  border: 1px solid rgba(56, 75, 104, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.dossier-card:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.stamp-classified {
+  border: 2px dashed rgba(239, 68, 68, 0.7);
+  color: #ef4444;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transform: rotate(-3deg);
+  display: inline-block;
+}
+
+.stamp-solved {
+  border: 2px dashed rgba(34, 197, 94, 0.8);
+  color: #22c55e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transform: rotate(-2deg);
+  display: inline-block;
+}
+
+/* Subtle focus indicators for accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+

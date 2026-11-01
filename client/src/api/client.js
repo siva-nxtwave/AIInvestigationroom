@@ -1,0 +1,102 @@
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+
+export class ApiError extends Error {
+  constructor(message, code, status, details = []) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code || 'INTERNAL_ERROR';
+    this.status = status;
+    this.details = details;
+  }
+}
+
+async function request(endpoint, options = {}) {
+  const url = `${API_BASE}${endpoint}`;
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  let response;
+  try {
+    response = await fetch(url, config);
+  } catch (netErr) {
+    throw new ApiError(
+      'Unable to connect to the mystery investigation server. Please ensure the server is running.',
+      'NETWORK_ERROR',
+      0
+    );
+  }
+
+  let data;
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  }
+
+  if (!response.ok) {
+    const errorPayload = data?.error || {};
+    const message = errorPayload.message || response.statusText || 'Request failed';
+    const code = errorPayload.code || 'UNKNOWN_ERROR';
+    throw new ApiError(message, code, response.status, errorPayload.details || []);
+  }
+
+  return data;
+}
+
+export const api = {
+  // Check health
+  async checkHealth() {
+    return request('/api/health');
+  },
+
+  // Create mystery
+  async createCase(premise, difficulty) {
+    return request('/api/cases', {
+      method: 'POST',
+      body: JSON.stringify({ premise, difficulty }),
+    });
+  },
+
+  // Retrieve active case
+  async getCase(id) {
+    return request(`/api/cases/${id}`);
+  },
+
+  // Discover clue
+  async discoverClue(caseId, clueId) {
+    return request(`/api/cases/${caseId}/clues/${clueId}/discover`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
+  // Request hint
+  async requestHint(caseId) {
+    return request(`/api/cases/${caseId}/hints`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
+  // Submit accusation
+  async submitAccusation(caseId, suspectId) {
+    return request(`/api/cases/${caseId}/accuse`, {
+      method: 'POST',
+      body: JSON.stringify({ suspectId }),
+    });
+  },
+
+  // Get completed result
+  async getCaseResult(caseId) {
+    return request(`/api/cases/${caseId}/result`);
+  },
+};
+
