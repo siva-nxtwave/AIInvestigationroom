@@ -1,5 +1,11 @@
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 
+if (!API_BASE && import.meta.env.PROD) {
+  console.warn(
+    '[API] VITE_API_BASE_URL is not set! In production on Vercel, set VITE_API_BASE_URL in Vercel Settings -> Environment Variables to your Render backend URL (e.g. https://your-service.onrender.com).'
+  );
+}
+
 export class ApiError extends Error {
   constructor(message, code, status, details = []) {
     super(message);
@@ -25,7 +31,9 @@ async function request(endpoint, options = {}) {
     response = await fetch(url, config);
   } catch (netErr) {
     throw new ApiError(
-      'Unable to connect to the mystery investigation server. Please ensure the server is running.',
+      !API_BASE && import.meta.env.PROD
+        ? 'Cannot connect to backend: VITE_API_BASE_URL is not configured in Vercel project settings.'
+        : 'Unable to connect to the mystery investigation server. Render free tier may be waking up (takes ~30s) or offline.',
       'NETWORK_ERROR',
       0
     );
@@ -43,8 +51,19 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const errorPayload = data?.error || {};
-    const message = errorPayload.message || response.statusText || 'Request failed';
-    const code = errorPayload.code || 'UNKNOWN_ERROR';
+    let message = errorPayload.message;
+    if (!message) {
+      if (!API_BASE && import.meta.env.PROD) {
+        message = 'VITE_API_BASE_URL is missing in Vercel. Set it to your Render backend URL and redeploy.';
+      } else if (response.status === 404) {
+        message = `API endpoint ${endpoint} was not found on the server.`;
+      } else if (response.status === 502 || response.status === 503) {
+        message = 'The backend server is temporarily unavailable or starting up. Please retry in a few moments.';
+      } else {
+        message = response.statusText || 'Request failed';
+      }
+    }
+    const code = errorPayload.code || (response.status === 404 ? 'NOT_FOUND' : 'SERVER_ERROR');
     throw new ApiError(message, code, response.status, errorPayload.details || []);
   }
 
@@ -99,4 +118,3 @@ export const api = {
     return request(`/api/cases/${caseId}/result`);
   },
 };
-

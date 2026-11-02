@@ -5,9 +5,9 @@ let memoryServer = null;
 
 export async function connectDB() {
   try {
-    // Attempt standard connection first
+    // Attempt standard connection first (10s timeout for cloud handshakes)
     await mongoose.connect(config.mongodbUri, {
-      serverSelectionTimeoutMS: 2500,
+      serverSelectionTimeoutMS: 10000,
     });
     console.log(`[Database] Connected to MongoDB at ${config.mongodbUri.replace(/\/\/.*@/, '//***@')}`);
   } catch (err) {

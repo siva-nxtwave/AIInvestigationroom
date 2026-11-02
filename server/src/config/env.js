@@ -20,10 +20,11 @@ export const config = {
 
 export function validateEnv() {
   const missing = [];
-  // Notice in production, MONGODB_URI and GEMINI_API_KEY should be set
   if (config.nodeEnv === 'production') {
     if (!process.env.MONGODB_URI) missing.push('MONGODB_URI');
-    if (!process.env.GEMINI_API_KEY) missing.push('GEMINI_API_KEY');
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('[Env] GEMINI_API_KEY is not set. Procedural mystery generator will be used.');
+    }
   }
 
   if (missing.length > 0) {
