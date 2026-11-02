@@ -14,7 +14,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   mongodbUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mystery_investigation',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
 };
 

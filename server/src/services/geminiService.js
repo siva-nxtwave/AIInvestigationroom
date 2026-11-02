@@ -140,12 +140,14 @@ export async function generateMysteryWithAI(premise, difficulty) {
     } catch (apiErr) {
       console.error(`[GeminiService] API error on attempt ${attempt + 1}:`, apiErr.message);
       if (attempt === MAX_RETRIES) {
-        throw new Error(`AI generation failed: ${apiErr.message}`);
+        console.warn('[GeminiService] AI service failed or unavailable. Falling back to procedural mystery generator.');
+        return generateProceduralMystery(premise, difficulty);
       }
     }
   }
 
-  throw new Error(`AI generated mystery failed validation after ${MAX_RETRIES + 1} attempts`);
+  console.warn('[GeminiService] AI generated mystery failed validation after retries. Falling back to procedural mystery generator.');
+  return generateProceduralMystery(premise, difficulty);
 }
 
 /**
