@@ -9,8 +9,8 @@ function startListening(app, initialPort, maxAttempts = 5) {
 
     function tryListen() {
       attempts++;
-      const server = app.listen(currentPort, () => {
-        console.log(`[Server] AI Mystery Investigation API running on http://localhost:${currentPort}`);
+      const server = app.listen(currentPort, '0.0.0.0', () => {
+        console.log(`[Server] AI Mystery Investigation API listening on 0.0.0.0:${currentPort}`);
         console.log(`[Server] Environment: ${config.nodeEnv}`);
         console.log(`[Server] AI Model: ${config.geminiModel} ${config.geminiApiKey ? '(Active)' : '(Procedural Fallback Mode)'}`);
         resolve({ server, port: currentPort });
@@ -39,10 +39,15 @@ function startListening(app, initialPort, maxAttempts = 5) {
 async function bootstrap() {
   try {
     validateEnv();
-    await connectDB();
 
     const app = createApp();
+    // Bind to port immediately so Render / cloud health checks pass without delay
     const { server } = await startListening(app, config.port);
+
+    // Connect to database in the background (handles slow DNS or Atlas handshakes gracefully)
+    connectDB().catch(dbErr => {
+      console.error('[Database] Asynchronous connection error:', dbErr.message);
+    });
 
     const shutdown = async signal => {
       console.log(`[Server] Received ${signal}. Shutting down gracefully...`);

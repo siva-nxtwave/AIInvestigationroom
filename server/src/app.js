@@ -33,17 +33,19 @@ export function createApp() {
     ...configuredOrigins,
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://aiinvestigationroom.karthikeyantech.in',
   ];
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-        // or allowed origins, or any *.vercel.app deployment preview
+        // or allowed origins, or any *.vercel.app, or karthikeyantech.in
         if (
           !origin ||
           allowedOrigins.includes(origin) ||
           origin.endsWith('.vercel.app') ||
+          origin.includes('karthikeyantech.in') ||
           config.nodeEnv === 'development'
         ) {
           return callback(null, true);
